@@ -10,9 +10,14 @@ if (environment.production) {
   enableProdMode();
 }
 
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.log(err));
+applyPolyfills()
+  .then(() => {
+    defineCustomElements();
+  }).catch((err) => {
+    console.log('err in defineCustomElements: ', err);
+  });
 
-applyPolyfills().then(() => {
-  defineCustomElements()
-})
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => {
+    console.log('error in bootstrapModule');
+  });

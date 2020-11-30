@@ -1,0 +1,1 @@
+import{p as promiseResolve,b as bootstrapLazy}from"./index-8c67e0df.js";var patchEsm=function(){return promiseResolve()};var defineCustomElements=function(e,t){if(typeof window==="undefined")return Promise.resolve();return patchEsm().then((function(){return bootstrapLazy([["my-component",[[1,"my-component",{first:[1],middle:[1],last:[1]}]]]],t)}))};export{defineCustomElements};

@@ -6,6 +6,7 @@ const angularValueAccessorBindings: ValueAccessorConfig[] = [];
 export const config: Config = {
   namespace: 'my-ds',
   taskQueue: 'async',
+  buildEs5: true,
   outputTargets: [
     angularOutputTarget({
       componentCorePackage: 'component-library-angular',

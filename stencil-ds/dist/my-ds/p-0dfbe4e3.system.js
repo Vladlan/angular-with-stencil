@@ -1,0 +1,1 @@
+System.register(["./p-c5482dfa.system.js"],(function(e,t){"use strict";var r,n;return{setters:[function(e){r=e.p;n=e.b}],execute:function(){var e=function(){var e=t.meta.url;var n={};if(e!==""){n.resourcesUrl=new URL(".",e).href}return r(n)};e().then((function(e){return n([["p-fbd79e31.system",[[1,"my-component",{first:[1],middle:[1],last:[1]}]]]],e)}))}}}));
