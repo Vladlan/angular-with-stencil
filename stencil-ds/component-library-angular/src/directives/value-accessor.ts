@@ -1,8 +1,15 @@
 import {Directive, ElementRef, HostListener} from '@angular/core';
-import {ControlValueAccessor} from '@angular/forms';
+import {ControlValueAccessor, NG_ASYNC_VALIDATORS, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 
-@Directive()
+@Directive({
+  selector: 'my-component',
+  host: {'(formValueChanged)': 'handleChangeEvent($event.detail.value)'},
+  providers: [
+    {provide: NG_VALUE_ACCESSOR, useExisting: ValueAccessor, multi: true},
+    {provide: NG_ASYNC_VALIDATORS, useExisting:ValueAccessor, multi:true}
+  ]
+})
 export class ValueAccessor implements ControlValueAccessor {
 
   private onChange: (value: any) => void = () => {/**/};

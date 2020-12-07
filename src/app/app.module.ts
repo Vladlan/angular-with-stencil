@@ -14,6 +14,7 @@ import { ComponentLibraryModule } from '../../stencil-ds/component-library-angul
     AppRoutingModule,
     ComponentLibraryModule
   ],
+  exports: [AppComponent],
   providers: [],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]

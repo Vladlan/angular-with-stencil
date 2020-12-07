@@ -1,11 +1,7 @@
-import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { defineCustomElements } from '../../loader';
-
-import { BooleanValueAccessor } from './directives/boolean-value-accessor';
-import { NumericValueAccessor } from './directives/number-value-accessor';
-import { RadioValueAccessor } from './directives/radio-value-accessor';
-import { SelectValueAccessor } from './directives/select-value-accessor';
-import { TextValueAccessor } from './directives/text-value-accessor';
+import { ValueAccessor } from './directives/value-accessor';
 import {
   MyComponent,
 } from './directives/proxies';
@@ -15,19 +11,15 @@ defineCustomElements(window);
 const DECLARATIONS = [
   // proxies
   MyComponent,
-
-  // Value Accessors
-  BooleanValueAccessor,
-  NumericValueAccessor,
-  RadioValueAccessor,
-  SelectValueAccessor,
-  TextValueAccessor,
+  ValueAccessor
 ];
 
 @NgModule({
-  declarations: DECLARATIONS,
-  exports: DECLARATIONS,
-  imports: [],
+  declarations: [...DECLARATIONS, ValueAccessor],
+  exports: [...DECLARATIONS, ValueAccessor],
+  entryComponents: DECLARATIONS,
+  imports: [CommonModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [],
 })
 export class ComponentLibraryModule {}

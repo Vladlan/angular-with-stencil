@@ -7,6 +7,12 @@ export const config: Config = {
   namespace: 'my-ds',
   taskQueue: 'async',
   buildEs5: true,
+  extras: {
+    cssVarsShim: true,
+    dynamicImportShim: true,
+    safari10: true,
+    shadowDomShim: true,
+  },
   outputTargets: [
     angularOutputTarget({
       componentCorePackage: 'component-library-angular',

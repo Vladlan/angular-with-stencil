@@ -27,13 +27,6 @@ import 'classlist.js';  // Run `npm install --save classlist.js`.
  * Standard animation support in Angular DOES NOT require any polyfills (as of Angular 6.0).
  */
 import 'web-animations-js';  // Run `npm install --save web-animations-js`.
-// import '@webcomponents/shadydom/shadydom.min.js';
-// import '@webcomponents/custom-elements/src/native-shim';
-import '@webcomponents/custom-elements/custom-elements.min';
-import 'core-js/es/object';
-import 'core-js/es/array';
-import 'core-js/es/promise';
-
 /**
  * By default, zone.js will patch all possible macroTask and DomEvents
  * user can disable parts of macroTask/DomEvents patch by setting following flags
@@ -57,7 +50,6 @@ import 'core-js/es/promise';
  *  (window as any).__Zone_enable_cross_context_check = true;
  *
  */
-
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
  */

@@ -1,32 +1,10 @@
-'use strict';
-
-function _interopNamespace(e) {
-  if (e && e.__esModule) { return e; } else {
-    var n = Object.create(null);
-    if (e) {
-      Object.keys(e).forEach(function (k) {
-        if (k !== 'default') {
-          var d = Object.getOwnPropertyDescriptor(e, k);
-          Object.defineProperty(n, k, d.get ? d : {
-            enumerable: true,
-            get: function () {
-              return e[k];
-            }
-          });
-        }
-      });
-    }
-    n['default'] = e;
-    return Object.freeze(n);
-  }
-}
-
 const NAMESPACE = 'my-ds';
 
 let scopeId;
 let hostTagName;
 let queuePending = false;
 const win = typeof window !== 'undefined' ? window : {};
+const CSS =  win.CSS ;
 const doc = win.document || { head: {} };
 const plt = {
     $flags$: 0,
@@ -37,6 +15,7 @@ const plt = {
     rel: (el, eventName, listener, opts) => el.removeEventListener(eventName, listener, opts),
     ce: (eventName, opts) => new CustomEvent(eventName, opts),
 };
+const supportsShadow =  /*@__PURE__*/ (() => (doc.head.attachShadow + '').indexOf('[native') > -1)() ;
 const promiseResolve = (v) => Promise.resolve(v);
 const supportsConstructibleStylesheets =  /*@__PURE__*/ (() => {
         try {
@@ -90,7 +69,18 @@ const addStyle = (styleContainerNode, cmpMeta, mode, hostElm) => {
             }
             if (!appliedStyles.has(scopeId)) {
                 {
-                    {
+                    if ( plt.$cssShim$) {
+                        styleElm = plt.$cssShim$.createHostStyle(hostElm, scopeId, style, !!(cmpMeta.$flags$ & 10 /* needsScopedEncapsulation */));
+                        const newScopeId = styleElm['s-sc'];
+                        if (newScopeId) {
+                            scopeId = newScopeId;
+                            // we don't want to add this styleID to the appliedStyles Set
+                            // since the cssVarShim might need to apply several different
+                            // stylesheets for the same component
+                            appliedStyles = null;
+                        }
+                    }
+                    else {
                         styleElm = doc.createElement('style');
                         styleElm.innerHTML = style;
                     }
@@ -112,7 +102,7 @@ const attachStyles = (hostRef) => {
     const elm = hostRef.$hostElement$;
     const flags = cmpMeta.$flags$;
     const endAttachStyles = createTime('attachStyles', cmpMeta.$tagName$);
-    const scopeId = addStyle( elm.shadowRoot ? elm.shadowRoot : elm.getRootNode(), cmpMeta);
+    const scopeId = addStyle( supportsShadow && elm.shadowRoot ? elm.shadowRoot : elm.getRootNode(), cmpMeta, hostRef.$modeName$, elm);
     if ( flags & 10 /* needsScopedEncapsulation */) {
         // only required when we're NOT using native shadow dom (slot)
         // or this browser doesn't support native shadow dom
@@ -419,6 +409,9 @@ const updateComponent = async (hostRef, instance, isInitialLoad) => {
             }
         }
     }
+    if ( plt.$cssShim$) {
+        plt.$cssShim$.updateHost(elm);
+    }
     if ( rc) {
         // ok, so turns out there are some child host elements
         // waiting on this parent element to load
@@ -635,6 +628,9 @@ const initializeComponent = async (elm, hostRef, cmpMeta, hmrVersionId, Cstr) =>
             const scopeId = getScopeId(cmpMeta);
             if (!styles.has(scopeId)) {
                 const endRegisterStyles = createTime('registerStyles', cmpMeta.$tagName$);
+                if ( cmpMeta.$flags$ & 8 /* needsShadowDomShim */) {
+                    style = await import('./shadow-css-140c4cf5.js').then(m => m.scopeCss(style, scopeId, false));
+                }
                 registerStyle(scopeId, style, !!(cmpMeta.$flags$ & 1 /* shadowDomEncapsulation */));
                 endRegisterStyles();
             }
@@ -701,6 +697,10 @@ const connectedCallback = (elm) => {
 const disconnectedCallback = (elm) => {
     if ((plt.$flags$ & 1 /* isTmpDisconnected */) === 0) {
         const hostRef = getHostRef(elm);
+        // clear CSS var-shim tracking
+        if ( plt.$cssShim$) {
+            plt.$cssShim$.removeHost(elm);
+        }
     }
 };
 const bootstrapLazy = (lazyBundles, options = {}) => {
@@ -726,6 +726,9 @@ const bootstrapLazy = (lazyBundles, options = {}) => {
         {
             cmpMeta.$members$ = compactMeta[2];
         }
+        if ( !supportsShadow && cmpMeta.$flags$ & 1 /* shadowDomEncapsulation */) {
+            cmpMeta.$flags$ |= 8 /* needsShadowDomShim */;
+        }
         const tagName =  cmpMeta.$tagName$;
         const HostElement = class extends HTMLElement {
             // StencilLazyHost
@@ -739,10 +742,13 @@ const bootstrapLazy = (lazyBundles, options = {}) => {
                     // and this browser supports shadow dom
                     // add the read-only property "shadowRoot" to the host element
                     // adding the shadow root build conditionals to minimize runtime
-                    {
+                    if (supportsShadow) {
                         {
                             self.attachShadow({ mode: 'open' });
                         }
+                    }
+                    else if ( !('shadowRoot' in self)) {
+                        self.shadowRoot = self;
                     }
                 }
             }
@@ -817,11 +823,11 @@ const loadModule = (cmpMeta, hostRef, hmrVersionId) => {
     if (module) {
         return module[exportName];
     }
-    return Promise.resolve().then(function () { return /*#__PURE__*/_interopNamespace(require(
+    return import(
     /* webpackInclude: /\.entry\.js$/ */
     /* webpackExclude: /\.system\.entry\.js$/ */
     /* webpackMode: "lazy" */
-    `./${bundleId}.entry.js${ ''}`)); }).then(importedModule => {
+    `./${bundleId}.entry.js${ ''}`).then(importedModule => {
         {
             cmpModules.set(bundleId, importedModule);
         }
@@ -872,7 +878,4 @@ const flush = () => {
 const nextTick = /*@__PURE__*/ (cb) => promiseResolve().then(cb);
 const writeTask = /*@__PURE__*/ queueTask(queueDomWrites, true);
 
-exports.bootstrapLazy = bootstrapLazy;
-exports.h = h;
-exports.promiseResolve = promiseResolve;
-exports.registerInstance = registerInstance;
+export { CSS as C, NAMESPACE as N, promiseResolve as a, bootstrapLazy as b, doc as d, h, plt as p, registerInstance as r, win as w };
